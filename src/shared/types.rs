@@ -1,6 +1,6 @@
 //! Shared data types used across all OrionPay contracts
 
-use soroban_sdk::{contracttype, Address, String};
+use soroban_sdk::{Address, String, contracttype};
 
 #[contracttype]
 #[derive(Debug, Clone, PartialEq, Eq)]

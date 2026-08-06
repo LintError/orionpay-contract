@@ -1,6 +1,6 @@
-use alloc::string::ToString;
-use soroban_sdk::{contracttype, Env, String};
 use crate::shared::{OrionError, Status};
+use alloc::string::ToString;
+use soroban_sdk::{Env, String, contracttype};
 
 #[contracttype]
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -47,13 +47,13 @@ pub fn create_split_payment(
         let idx = recipients.first_index_of(&recipient).unwrap();
         recipients.set(idx, r);
     }
-    
+
     if total_percentage != 100 {
         return Err(OrionError::InvalidPercentage);
     }
 
     let id = generate_split_id(&env);
-    
+
     let split = SplitPayment {
         id: id.clone(),
         sender,
@@ -63,13 +63,19 @@ pub fn create_split_payment(
         status: Status::Pending,
         created_at: env.ledger().timestamp(),
     };
-    
+
     env.storage().persistent().set(&id, &split);
     Ok(id)
 }
 
-pub fn process_recipient(env: Env, split_id: String, recipient_index: u32) -> Result<(), OrionError> {
-    let mut split: SplitPayment = env.storage().persistent()
+pub fn process_recipient(
+    env: Env,
+    split_id: String,
+    recipient_index: u32,
+) -> Result<(), OrionError> {
+    let mut split: SplitPayment = env
+        .storage()
+        .persistent()
         .get(&split_id)
         .ok_or(OrionError::NotFound)?;
 
@@ -101,7 +107,8 @@ pub fn process_recipient(env: Env, split_id: String, recipient_index: u32) -> Re
 }
 
 pub fn get_split_payment(env: Env, split_id: String) -> Result<SplitPayment, OrionError> {
-    env.storage().persistent()
+    env.storage()
+        .persistent()
         .get(&split_id)
         .ok_or(OrionError::NotFound)
 }

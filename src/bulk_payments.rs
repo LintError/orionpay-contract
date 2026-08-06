@@ -1,6 +1,6 @@
-use alloc::string::ToString;
-use soroban_sdk::{contracttype, Env, String};
 use crate::shared::{OrionError, Status};
+use alloc::string::ToString;
+use soroban_sdk::{Env, String, contracttype};
 
 #[contracttype]
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -33,7 +33,7 @@ pub fn create_bulk_payment(
     recipients: soroban_sdk::Vec<BulkPaymentRecipient>,
 ) -> Result<String, OrionError> {
     let id = generate_bulk_id(&env);
-    
+
     let bulk = BulkPayment {
         id: id.clone(),
         sender,
@@ -42,13 +42,19 @@ pub fn create_bulk_payment(
         status: Status::Pending,
         created_at: env.ledger().timestamp(),
     };
-    
+
     env.storage().persistent().set(&id, &bulk);
     Ok(id)
 }
 
-pub fn process_recipient(env: Env, bulk_id: String, recipient_index: u32) -> Result<(), OrionError> {
-    let mut bulk: BulkPayment = env.storage().persistent()
+pub fn process_recipient(
+    env: Env,
+    bulk_id: String,
+    recipient_index: u32,
+) -> Result<(), OrionError> {
+    let mut bulk: BulkPayment = env
+        .storage()
+        .persistent()
         .get(&bulk_id)
         .ok_or(OrionError::NotFound)?;
 
@@ -80,7 +86,8 @@ pub fn process_recipient(env: Env, bulk_id: String, recipient_index: u32) -> Res
 }
 
 pub fn get_bulk_payment(env: Env, bulk_id: String) -> Result<BulkPayment, OrionError> {
-    env.storage().persistent()
+    env.storage()
+        .persistent()
         .get(&bulk_id)
         .ok_or(OrionError::NotFound)
 }

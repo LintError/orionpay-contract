@@ -1,9 +1,10 @@
 //! Shared error types used across all OrionPay contracts
 
-use soroban_sdk::contracttype;
+use soroban_sdk::contracterror;
 
-#[contracttype]
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[contracterror]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+#[repr(u32)]
 pub enum OrionError {
     /// Generic unauthorized error
     Unauthorized = 1,

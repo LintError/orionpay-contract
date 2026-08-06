@@ -1,3 +1,6 @@
+[workspace]
+members = [".", "chains/stellar"]
+
 [package]
 name = "orionpay-contract"
 version = "0.1.0"
@@ -7,7 +10,7 @@ edition = "2024"
 soroban-sdk = { version = "26.1.0", features = ["alloc", "testutils"] }
 
 [lib]
-crate-type = ["cdylib", "staticlib"]
+crate-type = ["cdylib", "rlib"]
 
 [features]
 testutils = ["soroban-sdk/testutils"]

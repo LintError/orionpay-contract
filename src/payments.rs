@@ -1,5 +1,5 @@
+use crate::shared::{OrionError, Payment as SharedPayment, Status};
 use soroban_sdk::{Address, Env, String};
-use crate::shared::{OrionError, Status, Payment as SharedPayment};
 
 // Extended payment status for payments module
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -41,7 +41,7 @@ impl Payments {
         }
 
         let payment_id = Self::generate_payment_id(&env);
-        
+
         let payment = SharedPayment {
             id: payment_id.clone(),
             sender,
@@ -60,7 +60,9 @@ impl Payments {
 
     /// Complete a pending payment
     pub fn complete(env: Env, payment_id: String) -> Result<(), OrionError> {
-        let mut payment: SharedPayment = env.storage().persistent()
+        let mut payment: SharedPayment = env
+            .storage()
+            .persistent()
             .get(&payment_id)
             .ok_or(OrionError::NotFound)?;
 
@@ -83,7 +85,8 @@ impl Payments {
 
     /// Get payment details by ID
     pub fn get_payment(env: Env, payment_id: String) -> Result<SharedPayment, OrionError> {
-        env.storage().persistent()
+        env.storage()
+            .persistent()
             .get(&payment_id)
             .ok_or(OrionError::NotFound)
     }

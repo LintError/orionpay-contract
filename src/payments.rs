@@ -1,4 +1,4 @@
-use crate::shared::{OrionError, Payment as SharedPayment, Status};
+use crate::shared::{OrionError, Payment as SharedPayment, Status, ids};
 use soroban_sdk::{Address, Env, String};
 
 // Extended payment status for payments module
@@ -77,10 +77,13 @@ impl Payments {
     }
 
     /// Generate a unique payment ID
+    ///
+    /// IDs come from the shared helper so they stay unique even when two
+    /// payments are created in the same ledger. Previously the ID was derived
+    /// from the timestamp alone, so the second create in a ledger overwrote the
+    /// first payment's record.
     fn generate_payment_id(env: &Env) -> String {
-        let timestamp = env.ledger().timestamp();
-        // Create simple unique ID using timestamp
-        String::from_str(env, &alloc::format!("payment_{}", timestamp))
+        ids::generate(env, "payment")
     }
 
     /// Get payment details by ID

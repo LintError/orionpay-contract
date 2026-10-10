@@ -1,5 +1,4 @@
-use crate::shared::{OrionError, Status};
-use alloc::string::ToString;
+use crate::shared::{OrionError, Status, ids};
 use soroban_sdk::{Env, String, contracttype};
 
 #[contracttype]
@@ -23,10 +22,12 @@ pub struct SplitPayment {
     pub created_at: u64,
 }
 
+/// Generate a unique split-payment ID.
+///
+/// Namespaced via [`ids::generate`] so split IDs cannot collide with bulk IDs,
+/// which previously shared the bare-timestamp keyspace.
 fn generate_split_id(env: &Env) -> String {
-    // Create unique ID using timestamp which is already unique
-    let timestamp = env.ledger().timestamp();
-    String::from_str(env, &timestamp.to_string())
+    ids::generate(env, "split")
 }
 
 pub fn create_split_payment(

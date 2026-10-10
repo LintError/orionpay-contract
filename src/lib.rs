@@ -1,6 +1,10 @@
 #![no_std]
 extern crate alloc;
-use soroban_sdk::{Env, String, contract, contractimpl};
+
+// Core feature modules
+pub mod bulk_payments;
+pub mod payments;
+pub mod split_payments;
 
 // Shared modules that contain common types and errors used across all features
 pub mod shared {
@@ -11,14 +15,26 @@ pub mod shared {
     mod types;
 }
 
-// Core feature modules
-pub mod bulk_payments;
-pub mod payments;
-pub mod split_payments;
+// The scaffold contract entry points below are for local testing only.
+//
+// `orionpay-stellar` is the deployable contract and wraps these modules. If this
+// crate's `#[contractimpl]` were compiled into the same wasm module as the
+// wrapper, the two would each export a `version` symbol and the link would fail
+// with `duplicate symbol: version`. Gating on `scaffold-contract` (off by
+// default) keeps the wasm build to one contract surface; tests enable it via
+// `--features testutils`.
+//
+// This stays at the crate root rather than in a submodule because
+// `#[contractimpl]` generates the `OrionPayClient` type alongside the impl, and
+// `src/test.rs` refers to it unqualified.
+#[cfg(feature = "scaffold-contract")]
+use soroban_sdk::{Env, String, contract, contractimpl};
 
+#[cfg(feature = "scaffold-contract")]
 #[contract]
 pub struct OrionPay;
 
+#[cfg(feature = "scaffold-contract")]
 #[contractimpl]
 impl OrionPay {
     /// Version of the OrionPay contract

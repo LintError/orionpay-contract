@@ -22,12 +22,15 @@ pub struct SplitPayment {
     pub created_at: u64,
 }
 
+/// Namespace prefix for split-payment record IDs.
+const SPLIT_NAMESPACE: &str = "split";
+
 /// Generate a unique split-payment ID.
 ///
 /// Namespaced via [`ids::generate`] so split IDs cannot collide with bulk IDs,
 /// which previously shared the bare-timestamp keyspace.
 fn generate_split_id(env: &Env) -> String {
-    ids::generate(env, "split")
+    ids::generate(env, SPLIT_NAMESPACE)
 }
 
 pub fn create_split_payment(
@@ -74,6 +77,10 @@ pub fn process_recipient(
     split_id: String,
     recipient_index: u32,
 ) -> Result<(), OrionError> {
+    if !ids::is_in_namespace(&env, &split_id, SPLIT_NAMESPACE) {
+        return Err(OrionError::NotFound);
+    }
+
     let mut split: SplitPayment = env
         .storage()
         .persistent()
@@ -107,7 +114,20 @@ pub fn process_recipient(
     Ok(())
 }
 
+/// Get a split payment by ID.
+///
+/// # Errors
+///
+/// * [`OrionError::NotFound`] - no split payment with `split_id`, or `split_id`
+///   belongs to another record namespace (for example a payment or bulk ID)
 pub fn get_split_payment(env: Env, split_id: String) -> Result<SplitPayment, OrionError> {
+    // Reject IDs from other namespaces before touching storage: the ID is the
+    // storage key, so a foreign ID could otherwise resolve to a real record of
+    // a different type and fail to decode.
+    if !ids::is_in_namespace(&env, &split_id, SPLIT_NAMESPACE) {
+        return Err(OrionError::NotFound);
+    }
+
     env.storage()
         .persistent()
         .get(&split_id)

@@ -7,8 +7,12 @@ Thank you for your interest in contributing to OrionPay! This guide will help yo
 ### Prerequisites
 
 - **Rust** (latest stable) — install via [rustup](https://rustup.rs/)
-- **wasm32-unknown-unknown target** — `rustup target add wasm32-unknown-unknown`
+- **wasm32v1-none target** — `rustup target add wasm32v1-none`
 - **Git** for version control
+
+> Use `wasm32v1-none`, **not** `wasm32-unknown-unknown`. The Soroban environment
+> rejects the latter on Rust 1.82+ because that target enables `reference-types`
+> and `multi-value`, and the build fails inside `soroban-sdk`'s build script.
 
 ### Building the Project
 
@@ -23,8 +27,12 @@ cargo build --workspace
 Always run the full test suite before submitting:
 
 ```bash
-cargo test --workspace
+cargo test --workspace --features testutils
 ```
+
+The `testutils` feature is required: it enables the Soroban test helpers the
+suite uses, and it is deliberately off by default so those host-only helpers
+never reach the Wasm build.
 
 All tests must pass. Our CI enforces this.
 
@@ -61,10 +69,13 @@ cargo fmt --all -- --check
 cargo fmt --all
 
 # Lint with zero warnings
-cargo clippy --workspace --all-targets -- -D warnings
+cargo clippy --workspace --all-targets --features testutils -- -D warnings
 
 # Tests
-cargo test --workspace
+cargo test --workspace --features testutils
+
+# Build the deployable Wasm contracts
+cargo build --workspace --target wasm32v1-none --release
 ```
 
 **CI will fail if any of these fail**, so run them locally first.

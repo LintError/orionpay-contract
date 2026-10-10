@@ -4,12 +4,13 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-soroban-sdk = { version = "26.1.0", features = ["alloc", "testutils"] }
+soroban-sdk = { version = "26.1.0", features = ["alloc"] }
 orionpay-contract = { path = "../../" }
 
 [lib]
 crate-type = ["cdylib", "staticlib"]
 
 [features]
+# Host-only; see the note in the workspace root Cargo.toml.
 testutils = ["soroban-sdk/testutils"]
 default = []

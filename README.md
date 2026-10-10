@@ -54,16 +54,25 @@ The repository is a Cargo **workspace** with two members: `orionpay-contract` (c
 # Build every crate in the workspace
 cargo build --workspace
 
-# Run the full test suite
-cargo test --workspace
+# Run the full test suite (test-only helpers live behind the `testutils` feature)
+cargo test --workspace --features testutils
 
 # Lint (matches CI)
 cargo fmt --all -- --check
-cargo clippy --workspace --all-targets -- -D warnings
+cargo clippy --workspace --all-targets --features testutils -- -D warnings
 
 # Build the deployable Wasm contracts
-cargo build --workspace --target wasm32-unknown-unknown --release
+cargo build --workspace --target wasm32v1-none --release
 ```
+
+The Wasm target is `wasm32v1-none`, not `wasm32-unknown-unknown`: the Soroban
+environment does not support the `reference-types` and `multi-value` features
+that Rust 1.82+ enables for `wasm32-unknown-unknown`. Install the target with
+`rustup target add wasm32v1-none`. Building for `wasm32-unknown-unknown` fails
+in `soroban-sdk`'s build script.
+
+The deployable artifact is `chains/stellar` (`orionpay_stellar.wasm`); the core
+`orionpay-contract` crate is a library that it wraps.
 
 CI runs all of the above on every push and pull request — see
 [.github/workflows/ci.yml](.github/workflows/ci.yml).

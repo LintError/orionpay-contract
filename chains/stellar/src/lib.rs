@@ -32,8 +32,15 @@ impl OrionPayStellar {
     }
 
     /// Complete a payment by ID
-    pub fn complete_payment(env: Env, payment_id: String) -> Result<(), OrionError> {
-        Payments::complete(env, payment_id)
+    ///
+    /// `authorizer` must be the payment's sender or recipient and must sign the
+    /// call; otherwise the transaction is rejected.
+    pub fn complete_payment(
+        env: Env,
+        payment_id: String,
+        authorizer: Address,
+    ) -> Result<(), OrionError> {
+        Payments::complete(env, payment_id, authorizer)
     }
 
     /// Get a payment by ID

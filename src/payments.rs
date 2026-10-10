@@ -61,13 +61,37 @@ impl Payments {
         Ok(payment)
     }
 
-    /// Complete a pending payment
-    pub fn complete(env: Env, payment_id: String) -> Result<(), OrionError> {
+    /// Complete a pending payment.
+    ///
+    /// Completion is the state transition that (once token transfers land)
+    /// releases funds, so it must be authorized. Either party may complete: the
+    /// recipient claims the payment, or the sender confirms delivery.
+    /// `authorizer` must sign the call and must be the sender or the recipient.
+    ///
+    /// # Errors
+    ///
+    /// * [`OrionError::NotFound`] - no payment with `payment_id`
+    /// * [`OrionError::Unauthorized`] - `authorizer` is neither the sender nor
+    ///   the recipient
+    /// * [`OrionError::InvalidState`] - the payment is already completed
+    pub fn complete(
+        env: Env,
+        payment_id: String,
+        authorizer: Address,
+    ) -> Result<(), OrionError> {
+        // Require the caller to sign before any state is read or written.
+        authorizer.require_auth();
+
         let mut payment: SharedPayment = env
             .storage()
             .persistent()
             .get(&payment_id)
             .ok_or(OrionError::NotFound)?;
+
+        // Either party may complete: the recipient claims, or the sender confirms.
+        if authorizer != payment.sender && authorizer != payment.recipient {
+            return Err(OrionError::Unauthorized);
+        }
 
         if payment.completed_at.is_some() {
             return Err(OrionError::InvalidState);

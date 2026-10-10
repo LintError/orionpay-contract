@@ -74,11 +74,7 @@ impl Payments {
     /// * [`OrionError::Unauthorized`] - `authorizer` is neither the sender nor
     ///   the recipient
     /// * [`OrionError::InvalidState`] - the payment is already completed
-    pub fn complete(
-        env: Env,
-        payment_id: String,
-        authorizer: Address,
-    ) -> Result<(), OrionError> {
+    pub fn complete(env: Env, payment_id: String, authorizer: Address) -> Result<(), OrionError> {
         // Require the caller to sign before any state is read or written.
         authorizer.require_auth();
 

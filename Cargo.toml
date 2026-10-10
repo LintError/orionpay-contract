@@ -7,11 +7,20 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-soroban-sdk = { version = "26.1.0", features = ["alloc", "testutils"] }
+soroban-sdk = { version = "26.1.0", features = ["alloc"] }
 
 [lib]
 crate-type = ["cdylib", "rlib"]
 
 [features]
-testutils = ["soroban-sdk/testutils"]
+# `testutils` is host-only and must not be enabled for the wasm32 build, so it is
+# gated behind this feature instead of being listed in `[dependencies]`.
+# Run tests with `cargo test --features testutils`.
+testutils = ["soroban-sdk/testutils", "scaffold-contract"]
+
+# Exposes this crate's own `#[contractimpl]` (`version`, `hello`) for local
+# testing. Off by default because `orionpay-stellar` is the deployable contract
+# and compiling both surfaces into one wasm module yields `duplicate symbol`.
+scaffold-contract = []
+
 default = []

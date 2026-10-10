@@ -24,9 +24,9 @@ Closes #
 <!-- These match our CI gates — please run them locally before submitting. -->
 
 - [ ] `cargo fmt --all -- --check` passes
-- [ ] `cargo clippy --workspace --all-targets -- -D warnings` passes
+- [ ] `cargo clippy --workspace --all-targets --features testutils -- -D warnings` passes
 - [ ] `cargo build --workspace` succeeds
-- [ ] `cargo test --workspace` passes
+- [ ] `cargo test --workspace --features testutils` passes
 - [ ] I added tests covering my changes (success **and** error paths where applicable)
 - [ ] I updated documentation (README / doc comments) if behavior changed
 - [ ] My commits have clear messages

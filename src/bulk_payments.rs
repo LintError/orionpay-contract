@@ -1,5 +1,4 @@
-use crate::shared::{OrionError, Status};
-use alloc::string::ToString;
+use crate::shared::{OrionError, Status, ids};
 use soroban_sdk::{Env, String, contracttype};
 
 #[contracttype]
@@ -21,10 +20,15 @@ pub struct BulkPayment {
     pub created_at: u64,
 }
 
+/// Namespace prefix for bulk-payment record IDs.
+const BULK_NAMESPACE: &str = "bulk";
+
+/// Generate a unique bulk-payment ID.
+///
+/// Namespaced via [`ids::generate`] so bulk IDs cannot collide with split IDs,
+/// which previously shared the bare-timestamp keyspace.
 fn generate_bulk_id(env: &Env) -> String {
-    // Create unique ID using timestamp which is already unique
-    let timestamp = env.ledger().timestamp();
-    String::from_str(env, &timestamp.to_string())
+    ids::generate(env, BULK_NAMESPACE)
 }
 
 pub fn create_bulk_payment(
@@ -85,7 +89,20 @@ pub fn process_recipient(
     Ok(())
 }
 
+/// Get a bulk payment by ID.
+///
+/// # Errors
+///
+/// * [`OrionError::NotFound`] - no bulk payment with `bulk_id`, or `bulk_id`
+///   belongs to another record namespace (for example a payment or split ID)
 pub fn get_bulk_payment(env: Env, bulk_id: String) -> Result<BulkPayment, OrionError> {
+    // Reject IDs from other namespaces before touching storage: the ID is the
+    // storage key, so a foreign ID could otherwise resolve to a real record of
+    // a different type and fail to decode.
+    if !ids::is_in_namespace(&env, &bulk_id, BULK_NAMESPACE) {
+        return Err(OrionError::NotFound);
+    }
+
     env.storage()
         .persistent()
         .get(&bulk_id)

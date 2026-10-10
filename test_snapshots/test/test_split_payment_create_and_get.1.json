@@ -1,6 +1,6 @@
 {
   "generators": {
-    "address": 1,
+    "address": 3,
     "nonce": 0,
     "mux_id": 0
   },
@@ -27,7 +27,7 @@
               "ext": "v0",
               "contract": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD2KM",
               "key": {
-                "string": "0"
+                "string": "split_1"
               },
               "durability": "persistent",
               "val": {
@@ -53,7 +53,7 @@
                       "symbol": "id"
                     },
                     "val": {
-                      "string": "0"
+                      "string": "split_1"
                     }
                   },
                   {
@@ -69,7 +69,7 @@
                                 "symbol": "address"
                               },
                               "val": {
-                                "string": "addr1"
+                                "address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4"
                               }
                             },
                             {
@@ -105,7 +105,7 @@
                                 "symbol": "address"
                               },
                               "val": {
-                                "string": "addr2"
+                                "address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAHK3M"
                               }
                             },
                             {
@@ -183,7 +183,20 @@
                   "executable": {
                     "wasm": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
                   },
-                  "storage": null
+                  "storage": [
+                    {
+                      "key": {
+                        "vec": [
+                          {
+                            "symbol": "RecordSeq"
+                          }
+                        ]
+                      },
+                      "val": {
+                        "u64": "1"
+                      }
+                    }
+                  ]
                 }
               }
             }

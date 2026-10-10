@@ -1,4 +1,4 @@
-use crate::shared::{OrionError, Payment as SharedPayment, Status};
+use crate::shared::{OrionError, Payment as SharedPayment, Status, ids};
 use soroban_sdk::{Address, Env, String};
 
 // Extended payment status for payments module
@@ -20,6 +20,9 @@ impl From<ExtendedPaymentStatus> for Status {
         }
     }
 }
+
+/// Namespace prefix for payment record IDs.
+const PAYMENT_NAMESPACE: &str = "payment";
 
 /// Payments module handles single direct payments between accounts
 pub struct Payments;
@@ -58,13 +61,33 @@ impl Payments {
         Ok(payment)
     }
 
-    /// Complete a pending payment
-    pub fn complete(env: Env, payment_id: String) -> Result<(), OrionError> {
+    /// Complete a pending payment.
+    ///
+    /// Completion is the state transition that (once token transfers land)
+    /// releases funds, so it must be authorized. Either party may complete: the
+    /// recipient claims the payment, or the sender confirms delivery.
+    /// `authorizer` must sign the call and must be the sender or the recipient.
+    ///
+    /// # Errors
+    ///
+    /// * [`OrionError::NotFound`] - no payment with `payment_id`
+    /// * [`OrionError::Unauthorized`] - `authorizer` is neither the sender nor
+    ///   the recipient
+    /// * [`OrionError::InvalidState`] - the payment is already completed
+    pub fn complete(env: Env, payment_id: String, authorizer: Address) -> Result<(), OrionError> {
+        // Require the caller to sign before any state is read or written.
+        authorizer.require_auth();
+
         let mut payment: SharedPayment = env
             .storage()
             .persistent()
             .get(&payment_id)
             .ok_or(OrionError::NotFound)?;
+
+        // Either party may complete: the recipient claims, or the sender confirms.
+        if authorizer != payment.sender && authorizer != payment.recipient {
+            return Err(OrionError::Unauthorized);
+        }
 
         if payment.completed_at.is_some() {
             return Err(OrionError::InvalidState);
@@ -77,14 +100,29 @@ impl Payments {
     }
 
     /// Generate a unique payment ID
+    ///
+    /// IDs come from the shared helper so they stay unique even when two
+    /// payments are created in the same ledger. Previously the ID was derived
+    /// from the timestamp alone, so the second create in a ledger overwrote the
+    /// first payment's record.
     fn generate_payment_id(env: &Env) -> String {
-        let timestamp = env.ledger().timestamp();
-        // Create simple unique ID using timestamp
-        String::from_str(env, &alloc::format!("payment_{}", timestamp))
+        ids::generate(env, PAYMENT_NAMESPACE)
     }
 
     /// Get payment details by ID
+    ///
+    /// # Errors
+    ///
+    /// * [`OrionError::NotFound`] - no payment with `payment_id`, or `payment_id`
+    ///   belongs to another record namespace (for example a split or bulk ID)
     pub fn get_payment(env: Env, payment_id: String) -> Result<SharedPayment, OrionError> {
+        // Reject IDs from other namespaces before touching storage: the ID is
+        // the storage key, so a foreign ID could otherwise resolve to a real
+        // record of a different type and fail to decode.
+        if !ids::is_in_namespace(&env, &payment_id, PAYMENT_NAMESPACE) {
+            return Err(OrionError::NotFound);
+        }
+
         env.storage()
             .persistent()
             .get(&payment_id)

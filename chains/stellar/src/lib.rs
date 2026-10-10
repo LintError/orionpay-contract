@@ -32,8 +32,15 @@ impl OrionPayStellar {
     }
 
     /// Complete a payment by ID
-    pub fn complete_payment(env: Env, payment_id: String) -> Result<(), OrionError> {
-        Payments::complete(env, payment_id)
+    ///
+    /// `authorizer` must be the payment's sender or recipient and must sign the
+    /// call; otherwise the transaction is rejected.
+    pub fn complete_payment(
+        env: Env,
+        payment_id: String,
+        authorizer: Address,
+    ) -> Result<(), OrionError> {
+        Payments::complete(env, payment_id, authorizer)
     }
 
     /// Get a payment by ID
@@ -54,12 +61,16 @@ impl OrionPayStellar {
     }
 
     /// Process a recipient in a split payment
+    ///
+    /// `authorizer` must be the recipient at `recipient_index` and must sign
+    /// the call; otherwise the transaction is rejected.
     pub fn process_split_recipient(
         env: Env,
         split_id: String,
         recipient_index: u32,
+        authorizer: Address,
     ) -> Result<(), OrionError> {
-        split_payments::process_recipient(env, split_id, recipient_index)
+        split_payments::process_recipient(env, split_id, recipient_index, authorizer)
     }
 
     /// Get a split payment by ID

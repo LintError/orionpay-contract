@@ -9,6 +9,9 @@ pub mod shared {
 
     mod errors;
     mod types;
+
+    /// Collision-free record ID generation shared by every module.
+    pub mod ids;
 }
 
 // Core feature modules

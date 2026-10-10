@@ -1,5 +1,4 @@
-use crate::shared::{OrionError, Status};
-use alloc::string::ToString;
+use crate::shared::{OrionError, Status, ids};
 use soroban_sdk::{Env, String, contracttype};
 
 #[contracttype]
@@ -21,10 +20,12 @@ pub struct BulkPayment {
     pub created_at: u64,
 }
 
+/// Generate a unique bulk-payment ID.
+///
+/// Namespaced via [`ids::generate`] so bulk IDs cannot collide with split IDs,
+/// which previously shared the bare-timestamp keyspace.
 fn generate_bulk_id(env: &Env) -> String {
-    // Create unique ID using timestamp which is already unique
-    let timestamp = env.ledger().timestamp();
-    String::from_str(env, &timestamp.to_string())
+    ids::generate(env, "bulk")
 }
 
 pub fn create_bulk_payment(

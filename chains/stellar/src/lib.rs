@@ -61,12 +61,16 @@ impl OrionPayStellar {
     }
 
     /// Process a recipient in a split payment
+    ///
+    /// `authorizer` must be the recipient at `recipient_index` and must sign
+    /// the call; otherwise the transaction is rejected.
     pub fn process_split_recipient(
         env: Env,
         split_id: String,
         recipient_index: u32,
+        authorizer: Address,
     ) -> Result<(), OrionError> {
-        split_payments::process_recipient(env, split_id, recipient_index)
+        split_payments::process_recipient(env, split_id, recipient_index, authorizer)
     }
 
     /// Get a split payment by ID

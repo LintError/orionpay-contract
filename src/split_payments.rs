@@ -1,10 +1,14 @@
 use crate::shared::{OrionError, Status, ids};
-use soroban_sdk::{Env, String, contracttype};
+use soroban_sdk::{Address, Env, String, contracttype};
 
 #[contracttype]
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct SplitRecipient {
-    pub address: String,
+    /// Destination of this recipient's payout leg.
+    ///
+    /// Typed as `Address` (rather than `String`) so `process_recipient` can
+    /// require the recipient's own authorization.
+    pub address: Address,
     pub percentage: u32, // Percentage as integer (e.g., 50 for 50%)
     pub amount: u64,
     pub completed: bool,
@@ -72,11 +76,28 @@ pub fn create_split_payment(
     Ok(id)
 }
 
+/// Mark the recipient at `recipient_index` as completed.
+///
+/// Only the recipient named at that index may mark itself complete: `authorizer`
+/// must sign the call and must equal the stored recipient address. Marking a
+/// recipient complete is what authorizes that payout leg, so an unauthorized
+/// caller must not be able to advance the split on someone else's behalf.
+///
+/// # Errors
+///
+/// * [`OrionError::NotFound`] - no split payment with `split_id`
+/// * [`OrionError::InvalidRecipient`] - `recipient_index` is out of range
+/// * [`OrionError::Unauthorized`] - `authorizer` is not the recipient at
+///   `recipient_index`
 pub fn process_recipient(
     env: Env,
     split_id: String,
     recipient_index: u32,
+    authorizer: Address,
 ) -> Result<(), OrionError> {
+    // Require the caller to sign before any state is read or written.
+    authorizer.require_auth();
+
     if !ids::is_in_namespace(&env, &split_id, SPLIT_NAMESPACE) {
         return Err(OrionError::NotFound);
     }
@@ -87,15 +108,24 @@ pub fn process_recipient(
         .get(&split_id)
         .ok_or(OrionError::NotFound)?;
 
-    if split.status == Status::Completed {
-        return Ok(());
-    }
-
+    // Bounds check before the `Completed` early return, so an out-of-range
+    // index is reported as `InvalidRecipient` rather than silently succeeding.
     if recipient_index >= split.recipients.len() {
         return Err(OrionError::InvalidRecipient);
     }
 
     let mut recipient = split.recipients.get(recipient_index).unwrap();
+
+    // The signer must be the recipient being completed: marking a recipient
+    // complete is what authorizes that payout leg.
+    if recipient.address != authorizer {
+        return Err(OrionError::Unauthorized);
+    }
+
+    if split.status == Status::Completed {
+        return Ok(());
+    }
+
     if !recipient.completed {
         recipient.completed = true;
         split.recipients.set(recipient_index, recipient);

@@ -21,6 +21,9 @@ impl From<ExtendedPaymentStatus> for Status {
     }
 }
 
+/// Namespace prefix for payment record IDs.
+const PAYMENT_NAMESPACE: &str = "payment";
+
 /// Payments module handles single direct payments between accounts
 pub struct Payments;
 
@@ -83,11 +86,23 @@ impl Payments {
     /// from the timestamp alone, so the second create in a ledger overwrote the
     /// first payment's record.
     fn generate_payment_id(env: &Env) -> String {
-        ids::generate(env, "payment")
+        ids::generate(env, PAYMENT_NAMESPACE)
     }
 
     /// Get payment details by ID
+    ///
+    /// # Errors
+    ///
+    /// * [`OrionError::NotFound`] - no payment with `payment_id`, or `payment_id`
+    ///   belongs to another record namespace (for example a split or bulk ID)
     pub fn get_payment(env: Env, payment_id: String) -> Result<SharedPayment, OrionError> {
+        // Reject IDs from other namespaces before touching storage: the ID is
+        // the storage key, so a foreign ID could otherwise resolve to a real
+        // record of a different type and fail to decode.
+        if !ids::is_in_namespace(&env, &payment_id, PAYMENT_NAMESPACE) {
+            return Err(OrionError::NotFound);
+        }
+
         env.storage()
             .persistent()
             .get(&payment_id)

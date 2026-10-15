@@ -1,5 +1,6 @@
 #![cfg(test)]
 use super::*;
+use crate::bulk_payments::{BulkPaymentRecipient, create_bulk_payment, get_bulk_payment};
 use crate::payments::Payments;
 use crate::shared::{OrionError, Status};
 use crate::split_payments::{SplitRecipient, create_split_payment, get_split_payment};
@@ -171,4 +172,61 @@ fn test_split_payment_create_and_get() {
     // Verify amounts were calculated correctly
     assert_eq!(split.recipients.get(0).unwrap().amount, 600);
     assert_eq!(split.recipients.get(1).unwrap().amount, 400);
+}
+
+#[test]
+fn test_split_payment_not_found() {
+    let env = Env::default();
+    let contract_id = env.register(OrionPay, ());
+
+    let result = env.as_contract(&contract_id, || {
+        get_split_payment(env.clone(), String::from_str(&env, "nope"))
+    });
+    assert_eq!(result.unwrap_err(), OrionError::NotFound);
+}
+
+#[test]
+fn test_bulk_payment_not_found() {
+    let env = Env::default();
+    let contract_id = env.register(OrionPay, ());
+
+    let result = env.as_contract(&contract_id, || {
+        get_bulk_payment(env.clone(), String::from_str(&env, "nope"))
+    });
+    assert_eq!(result.unwrap_err(), OrionError::NotFound);
+}
+
+#[test]
+fn test_bulk_payment_create_and_get() {
+    let env = Env::default();
+    let contract_id = env.register(OrionPay, ());
+
+    let mut recipients = soroban_sdk::Vec::new(&env);
+    recipients.push_back(BulkPaymentRecipient {
+        address: String::from_str(&env, "addr1"),
+        amount: 700,
+        completed: false,
+    });
+    recipients.push_back(BulkPaymentRecipient {
+        address: String::from_str(&env, "addr2"),
+        amount: 300,
+        completed: false,
+    });
+
+    let bulk_id = env
+        .as_contract(&contract_id, || {
+            create_bulk_payment(env.clone(), String::from_str(&env, "sender"), recipients)
+        })
+        .unwrap();
+
+    let bulk = env
+        .as_contract(&contract_id, || {
+            get_bulk_payment(env.clone(), bulk_id.clone())
+        })
+        .unwrap();
+
+    assert_eq!(bulk.sender, String::from_str(&env, "sender"));
+    assert_eq!(bulk.completed_count, 0);
+    assert_eq!(bulk.status, Status::Pending);
+    assert_eq!(bulk.recipients.len(), 2);
 }

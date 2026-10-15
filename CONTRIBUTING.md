@@ -36,6 +36,31 @@ never reach the Wasm build.
 
 All tests must pass. Our CI enforces this.
 
+### Running a Single Test
+
+Waiting for the whole workspace on every iteration is slow. The workspace has two
+crates — `orionpay-contract` and `orionpay-stellar` — so `-p <crate>` is the fast
+path when you are working on one of them.
+
+```bash
+# one crate only
+cargo test -p orionpay-contract --features testutils
+cargo test -p orionpay-stellar --features testutils
+
+# filter by a test name substring
+cargo test -p orionpay-contract --features testutils payment_invalid
+
+# watch the printed output from a test (no capture)
+cargo test -p orionpay-contract --features testutils <name> -- --nocapture
+
+# run a test against the release profile (overflow checks are relaxed there)
+cargo test -p orionpay-contract --features testutils --release <name>
+```
+
+`<name>` is any substring of the fully-qualified test path, so a short, unique
+substring is enough. Before you commit, always run the full `cargo test --workspace
+--features testutils` from above — a green single test does not clear the suite.
+
 ## Making Changes
 
 ### 1. Fork and Clone

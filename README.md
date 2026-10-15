@@ -95,3 +95,6 @@ For bug reports and feature requests, use our [issue templates](.github/ISSUE_TE
 
 MIT — see [LICENSE](LICENSE).
 
+## Changelog
+
+See [CHANGELOG.md](CHANGELOG.md) for release history and in-progress changes.

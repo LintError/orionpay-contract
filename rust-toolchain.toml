@@ -1,0 +1,11 @@
+[toolchain]
+# Pins the exact toolchain a fresh clone should build with. A bare `stable` in CI
+# resolves to whatever is newest on the day it runs, which is how the
+# wasm32v1-none target regression went unnoticed. rustup reads this file, so the
+# `dtolnay/rust-toolchain` step in .github/workflows/ci.yml (no explicit channel)
+# now installs this version instead of floating.
+channel = "1.93.0"
+# Keep in sync with what CI's clippy/fmt steps expect.
+components = ["rustfmt", "clippy"]
+# The only target CI builds and tests the deployable contract with.
+targets = ["wasm32v1-none"]

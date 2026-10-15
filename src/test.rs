@@ -13,7 +13,7 @@ fn test_version_and_hello() {
 
     // Test version
     let version = client.version();
-    assert_eq!(version, String::from_str(&env, "0.1.0"));
+    assert_eq!(version, String::from_str(&env, env!("CARGO_PKG_VERSION")));
 
     // Test hello
     let result = client.hello(&String::from_str(&env, "Orion"));

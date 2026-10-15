@@ -37,9 +37,10 @@ pub struct OrionPay;
 #[cfg(feature = "scaffold-contract")]
 #[contractimpl]
 impl OrionPay {
-    /// Version of the OrionPay contract
+    /// Version of the OrionPay contract, derived from the crate manifest so it
+    /// can never drift from the version in `Cargo.toml`.
     pub fn version(env: Env) -> String {
-        String::from_str(&env, "0.1.0")
+        String::from_str(&env, env!("CARGO_PKG_VERSION"))
     }
 
     /// Simple hello function that greets the given name: "Hello <to>"

@@ -86,6 +86,15 @@ cargo build --workspace --target wasm32v1-none --release
 - Keep commits focused on a single logical change
 - Reference issue numbers when applicable: `Fix #42: validate split payment percentages`
 
+### Changelog
+
+If your change is user-facing, add a one-line entry under `## [Unreleased]` in
+`CHANGELOG.md` in the same PR that changes behaviour, using the Keep a Changelog
+categories (`Added`, `Changed`, `Deprecated`, `Removed`, `Fixed`, `Security`).
+Link the entry to the issue that drives it. Mark any change that alters the on-chain ABI
+as `### BREAKING` so integrators know their client may need to update. Do not rewrite the
+`[0.1.0]` entry; it is a frozen baseline.
+
 ### 5. Testing Your Changes
 
 - Add tests for new features

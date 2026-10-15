@@ -2,7 +2,7 @@
 
 Rust smart contracts for OrionPay, targeting the Stellar (Soroban) blockchain with a multi-chain structure.
 
-[![CI](https://github.com/YOUR_ORG/orionpay-contract/actions/workflows/ci.yml/badge.svg)](https://github.com/YOUR_ORG/orionpay-contract/actions/workflows/ci.yml)
+[![CI](https://github.com/LintError/orionpay-contract/actions/workflows/ci.yml/badge.svg)](https://github.com/LintError/orionpay-contract/actions/workflows/ci.yml)
 
 ## Features
 

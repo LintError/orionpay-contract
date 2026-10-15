@@ -45,6 +45,7 @@ Fork the repository, then clone your fork:
 ```bash
 git clone https://github.com/YOUR_USERNAME/orionpay-contract.git
 cd orionpay-contract
+# (replace YOUR_USERNAME with your own GitHub username)
 ```
 
 ### 2. Create a Branch
@@ -167,7 +168,7 @@ Be respectful, constructive, and welcoming. See [CODE_OF_CONDUCT.md](CODE_OF_CON
 
 ## Questions?
 
-- Check existing [issues](../../issues) and [pull requests](../../pulls)
+- Check existing [issues](https://github.com/LintError/orionpay-contract/issues) and [pull requests](https://github.com/LintError/orionpay-contract/pulls)
 - Open a new issue for bugs or feature requests
 - Tag issues appropriately: `bug`, `enhancement`, `question`, `good first issue`
 

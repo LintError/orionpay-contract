@@ -1,8 +1,8 @@
 blank_issues_enabled: false
 contact_links:
   - name: Security Vulnerability
-    url: https://github.com/DevIKargi/orionpay-contract/security/advisories/new
+    url: https://github.com/LintError/orionpay-contract/security/advisories/new
     about: Please report security vulnerabilities privately — do NOT open a public issue. See SECURITY.md.
   - name: Questions & Discussions
-    url: https://github.com/DevIKargi/orionpay-contract/discussions
+    url: https://github.com/LintError/orionpay-contract/discussions
     about: Ask questions and discuss ideas with the community.

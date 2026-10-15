@@ -91,6 +91,14 @@ For bug reports and feature requests, use our [issue templates](.github/ISSUE_TE
 
 ---
 
+## Versioning
+
+`version()` derives its value from the crate manifest (`env!("CARGO_PKG_VERSION")`),
+so a version bump in `Cargo.toml` is reported on-chain automatically. The deployable
+Stellar wrapper reports the same value with a `-stellar` chain qualifier appended
+(`concat!(env!("CARGO_PKG_VERSION"), "-stellar")); that suffix names the chain, not a
+separate version. Both crates stay at the same manifest version.
+
 ## License
 
 MIT — see [LICENSE](LICENSE).

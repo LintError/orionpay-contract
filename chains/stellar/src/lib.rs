@@ -12,9 +12,10 @@ pub struct OrionPayStellar;
 
 #[contractimpl]
 impl OrionPayStellar {
-    /// Get the contract version
+    /// Get the contract version. The semantic version comes from the crate
+    /// manifest; `-stellar` is a chain qualifier, not part of the version.
     pub fn version(env: Env) -> String {
-        String::from_str(&env, "0.1.0-stellar")
+        String::from_str(&env, concat!(env!("CARGO_PKG_VERSION"), "-stellar"))
     }
 
     // ============ Single Payments ============
@@ -92,3 +93,6 @@ impl OrionPayStellar {
         bulk_payments::get_bulk_payment(env, bulk_id)
     }
 }
+
+#[cfg(test)]
+mod test;

@@ -5,6 +5,9 @@ members = [".", "chains/stellar"]
 name = "orionpay-contract"
 version = "0.1.0"
 edition = "2024"
+# MSRV. `edition = "2024"` already requires Rust >= 1.85; 1.93 is the lowest
+# version this workspace is known to build with (see rust-toolchain.toml).
+rust-version = "1.93"
 
 [dependencies]
 soroban-sdk = { version = "26.1.0", features = ["alloc"] }

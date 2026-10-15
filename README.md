@@ -50,6 +50,11 @@ The repository is a Cargo **workspace** with two members: `orionpay-contract` (c
 
 ## Build & Test
 
+**Requirements:** Rust 1.93+ (MSRV), installed via [rustup](https://rustup.rs/). A
+`rust-toolchain.toml` at the repository root pins the exact toolchain, so `rustup`
+selects it on a fresh clone and a plain `cargo build` reproduces CI. Both crates also
+declare `rust-version = "1.93"` in their `Cargo.toml`.
+
 ```bash
 # Build every crate in the workspace
 cargo build --workspace

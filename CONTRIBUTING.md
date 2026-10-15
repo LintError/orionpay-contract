@@ -6,7 +6,10 @@ Thank you for your interest in contributing to OrionPay! This guide will help yo
 
 ### Prerequisites
 
-- **Rust** (latest stable) — install via [rustup](https://rustup.rs/)
+- **Rust** — install via [rustup](https://rustup.rs/). The pinned MSRV is
+  **Rust 1.93**; `rust-toolchain.toml` at the repository root makes `rustup` select it
+  automatically on a fresh clone (so a plain `cargo build` reproduces CI). This is a
+  floor, not a ceiling: any newer stable works.
 - **wasm32v1-none target** — `rustup target add wasm32v1-none`
 - **Git** for version control
 
